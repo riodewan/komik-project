@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from '../../axios';
+import axios from '../../../axios';
 import { showError, showSuccess } from '../../../src/utils/toast';
 
 export default function EditComic() {
@@ -21,6 +21,7 @@ export default function EditComic() {
   const [coverPreview, setCoverPreview] = useState(null);
   const [genres, setGenres] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,12 +44,11 @@ export default function EditComic() {
           author: comic.author || '',
           artist: comic.artist || '',
           status: comic.status || 'Ongoing',
-          genre_ids: comic.genres ? comic.genres.map(g => g.id) : [],
+          genre_ids: comic.genres ? comic.genres.map(g => String(g.id)) : [],
           cover_image: comic.cover_image || ''
         });
       } catch (err) {
-        console.error(err);
-        alert('Gagal mengambil data komik');
+        showError('❌ Gagal mengambil data komik');
         navigate('/admin/comics');
       } finally {
         setLoading(false);
@@ -66,7 +66,7 @@ export default function EditComic() {
     const options = e.target.options;
     const selected = [];
     for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) selected.push(options[i].value);
+      if (options[i].selected) selected.push(parseInt(options[i].value)); // ✅ pastikan angka
     }
     setForm({ ...form, genre_ids: selected });
   };
@@ -84,6 +84,7 @@ export default function EditComic() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSaving(true);
     const formData = new FormData();
     for (let key in form) {
       if (key === 'genre_ids') {
@@ -103,9 +104,10 @@ export default function EditComic() {
       });
       showSuccess('✅ Komik berhasil diupdate');
       navigate('/admin/comics');
-    } catch (err) {
-      console.error(err.response?.data);
+    } catch {
       showError('❌ Gagal update komik');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -173,7 +175,6 @@ export default function EditComic() {
           <option value="Hiatus">Hiatus</option>
         </select>
 
-        {/* ✅ Multi-select genre */}
         <div>
           <label className="block mb-1 text-sm font-medium dark:text-gray-300">Pilih Genre</label>
           <select
@@ -191,10 +192,9 @@ export default function EditComic() {
           <p className="text-xs text-gray-500 mt-1">Tekan CTRL/CMD + Klik untuk memilih banyak genre</p>
         </div>
 
-        {/* ✅ Cover lama + preview baru */}
         <div>
           <label className="block mb-1 text-sm font-medium dark:text-gray-300">Cover Image</label>
-          <input type="file" onChange={(e) => handleCover(e.target.files[0])} className="block w-full text-sm" />
+          <input type="file" accept="image/*" onChange={(e) => handleCover(e.target.files[0])} className="block w-full text-sm" />
           <div className="flex gap-4 mt-3">
             {form.cover_image && !coverPreview && (
               <img
@@ -216,9 +216,11 @@ export default function EditComic() {
         <div className="flex justify-end">
           <button
             type="submit"
-            className="bg-gradient-to-r from-blue-600 to-indigo-500 hover:opacity-90 text-white px-6 py-2 rounded shadow transition"
+            disabled={saving}
+            className="bg-gradient-to-r from-blue-600 to-indigo-500 hover:opacity-90 text-white px-6 py-2 rounded shadow transition flex items-center gap-2 disabled:opacity-50"
           >
-            💾 Simpan Perubahan
+            {saving && <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>}
+            {saving ? 'Menyimpan...' : '💾 Simpan Perubahan'}
           </button>
         </div>
       </form>

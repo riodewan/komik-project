@@ -34,7 +34,7 @@ Route::post('/login', function (Request $request) {
     ]);
 });
 
-Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+Route::prefix('admin')->group(function () {
     Route::apiResource('users', UserController::class);
     Route::apiResource('comics', ComicController::class);
 

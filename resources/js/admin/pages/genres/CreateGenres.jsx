@@ -1,26 +1,61 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "../../axios";
+import axios from "../../../axios";
 import { motion } from "framer-motion";
-import { showSuccess, showError } from "../../../src/utils/toast";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 export default function CreateGenre() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (name.trim().length < 2) {
+      MySwal.fire({
+        icon: "warning",
+        title: "Nama Genre Terlalu Pendek",
+        text: "Minimal 2 karakter.",
+        background: "#1f2937",
+        color: "#fff",
+        confirmButtonColor: "#3b82f6",
+      });
+      return;
+    }
+
     setLoading(true);
-    axios.post("/api/admin/genres", { name }, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-    })
-    .then(() => {
-      showSuccess("Genre berhasil ditambahkan");
-      navigate("/admin/genres");
-    })
-    .catch(() => showError("Gagal menambahkan genre"))
-    .finally(() => setLoading(false));
+    try {
+      await axios.post(
+        "/api/admin/genres",
+        { name },
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+      );
+
+      MySwal.fire({
+        icon: "success",
+        title: "Berhasil",
+        text: "Genre berhasil ditambahkan!",
+        background: "#1f2937",
+        color: "#fff",
+        confirmButtonColor: "#3b82f6",
+      }).then(() => navigate("/admin/genres"));
+
+    } catch (err) {
+      MySwal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: "Terjadi kesalahan saat menambahkan genre.",
+        background: "#1f2937",
+        color: "#fff",
+        confirmButtonColor: "#ef4444",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -57,8 +92,14 @@ export default function CreateGenre() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition text-white px-4 py-3 rounded-lg font-semibold shadow-lg disabled:opacity-50"
+            className="w-full flex justify-center items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition text-white px-4 py-3 rounded-lg font-semibold shadow-lg disabled:opacity-50"
           >
+            {loading && (
+              <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"></path>
+              </svg>
+            )}
             {loading ? "Menyimpan..." : "Simpan Genre"}
           </button>
         </form>

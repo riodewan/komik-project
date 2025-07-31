@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "../../axios";
-import { motion } from "framer-motion";
-import { showSuccess, showError } from "../../../src/utils/toast";
+import axios from "../../../axios";
+import { motion, AnimatePresence } from "framer-motion";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 export default function Genres() {
   const [genres, setGenres] = useState([]);
@@ -13,20 +16,59 @@ export default function Genres() {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     })
     .then(res => setGenres(res.data))
-    .catch(err => showError("Gagal memuat genre"))
+    .catch(() => {
+      MySwal.fire({
+        icon: "error",
+        title: "Gagal Memuat",
+        text: "Tidak dapat mengambil data genre.",
+        background: "#1f2937",
+        color: "#fff",
+        confirmButtonColor: "#ef4444"
+      });
+    })
     .finally(() => setLoading(false));
   };
 
   const handleDelete = (id) => {
-    if (!confirm("Yakin ingin menghapus genre ini?")) return;
-    axios.delete(`/api/admin/genres/${id}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-    })
-    .then(() => {
-      setGenres(prev => prev.filter(g => g.id !== id));
-      showSuccess("Genre berhasil dihapus");
-    })
-    .catch(() => showError("Gagal hapus genre"));
+    MySwal.fire({
+      title: "Yakin hapus genre ini?",
+      text: "Tindakan ini tidak bisa dibatalkan.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+      background: "#1f2937",
+      color: "#fff"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios.delete(`/api/admin/genres/${id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        })
+        .then(() => {
+          setGenres(prev => prev.filter(g => g.id !== id));
+          MySwal.fire({
+            icon: "success",
+            title: "Dihapus!",
+            text: "Genre berhasil dihapus.",
+            background: "#1f2937",
+            color: "#fff",
+            confirmButtonColor: "#3b82f6"
+          });
+        })
+        .catch(() => {
+          MySwal.fire({
+            icon: "error",
+            title: "Gagal",
+            text: "Terjadi kesalahan saat menghapus genre.",
+            background: "#1f2937",
+            color: "#fff",
+            confirmButtonColor: "#ef4444"
+          });
+        });
+      }
+    });
   };
 
   useEffect(() => {
@@ -46,7 +88,9 @@ export default function Genres() {
       </div>
 
       {loading ? (
-        <p className="text-gray-400 text-center">Memuat data...</p>
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+        </div>
       ) : genres.length === 0 ? (
         <motion.div
           initial={{ opacity: 0 }}
@@ -69,31 +113,34 @@ export default function Genres() {
             </tr>
           </thead>
           <tbody>
-            {genres.map((g, index) => (
-              <motion.tr
-                key={g.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="hover:bg-gray-700 transition"
-              >
-                <td className="p-3 border-b border-gray-700">{index + 1}</td>
-                <td className="p-3 border-b border-gray-700 font-medium">{g.name}</td>
-                <td className="p-3 border-b border-gray-700 space-x-3">
-                  <Link
-                    to={`/admin/genres/edit/${g.id}`}
-                    className="text-blue-400 hover:underline"
-                  >
-                    Edit
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(g.id)}
-                    className="text-red-400 hover:underline"
-                  >
-                    Hapus
-                  </button>
-                </td>
-              </motion.tr>
-            ))}
+            <AnimatePresence>
+              {genres.map((g, index) => (
+                <motion.tr
+                  key={g.id}
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: -50 }}
+                  className="hover:bg-gray-700 transition"
+                >
+                  <td className="p-3 border-b border-gray-700">{index + 1}</td>
+                  <td className="p-3 border-b border-gray-700 font-medium">{g.name}</td>
+                  <td className="p-3 border-b border-gray-700 space-x-3">
+                    <Link
+                      to={`/admin/genres/edit/${g.id}`}
+                      className="text-blue-400 hover:underline"
+                    >
+                      Edit
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(g.id)}
+                      className="text-red-400 hover:underline"
+                    >
+                      Hapus
+                    </button>
+                  </td>
+                </motion.tr>
+              ))}
+            </AnimatePresence>
           </tbody>
         </motion.table>
       )}

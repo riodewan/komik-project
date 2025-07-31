@@ -31,13 +31,15 @@ class ComicController extends Controller
             'genre_ids.*' => 'exists:genres,id'
         ]);
 
+        // ✅ Tambahkan slug otomatis dari title
+        $validated['slug'] = Str::slug($validated['title']);
+
         if ($request->hasFile('cover_image')) {
             $validated['cover_image'] = $request->file('cover_image')->store('covers', 'public');
         }
 
         $comic = Comic::create($validated);
 
-        // ✅ Sinkronkan genre
         if ($request->has('genre_ids')) {
             $comic->genres()->sync($request->genre_ids);
         }
@@ -60,15 +62,23 @@ class ComicController extends Controller
             'genre_ids.*' => 'exists:genres,id'
         ]);
 
+        // ✅ generate slug
+        $validated['slug'] = \Str::slug($validated['title']);
+
         if ($request->hasFile('cover_image')) {
+            // Hapus cover lama
+            if ($comic->cover_image && \Storage::disk('public')->exists($comic->cover_image)) {
+                \Storage::disk('public')->delete($comic->cover_image);
+            }
             $validated['cover_image'] = $request->file('cover_image')->store('covers', 'public');
         }
 
         $comic->update($validated);
 
-        // ✅ Sinkronkan genre
         if ($request->has('genre_ids')) {
             $comic->genres()->sync($request->genre_ids);
+        } else {
+            $comic->genres()->sync([]); // kosongkan jika tidak ada genre
         }
 
         return response()->json(['data' => $comic->load('genres')]);

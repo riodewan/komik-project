@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
-import axios from '../axios';
+import axios from '../../axios';
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {

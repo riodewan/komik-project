@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import axios from '../axios';
+import axios from '../../axios';
 import Error403 from '../../src/pages/Error403';
 
 export default function PrivateRoute({ children }) {

@@ -1,7 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import axios from '../../axios';
+import axios from '../../../axios';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 import { showSuccess, showError } from '../../../src/utils/toast';
+
+const MySwal = withReactContent(Swal);
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -17,12 +21,43 @@ export default function Users() {
   };
 
   const handleDelete = (id) => {
-    if (!confirm('Yakin ingin menghapus user ini?')) return;
-    axios.delete(`/api/admin/users/${id}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    })
-    .then(() => setUsers(prev => prev.filter(user => user.id !== id)))
-    .catch(() => showError('Terjadi kesalahan saat menghapus user.'));
+    MySwal.fire({
+      title: 'Hapus User?',
+      text: 'Data user akan dihapus secara permanen!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal',
+      background: '#1f2937',
+      color: '#fff',
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      backdrop: 'rgba(0,0,0,0.4) blur(5px)',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axios.delete(`/api/admin/users/${id}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          });
+          setUsers(prev => prev.filter(user => user.id !== id));
+
+          MySwal.fire({
+            icon: 'success',
+            title: 'Terhapus!',
+            text: 'User berhasil dihapus.',
+            background: '#1f2937',
+            color: '#fff',
+            confirmButtonColor: '#3b82f6',
+            backdrop: 'rgba(0,0,0,0.4) blur(5px)',
+            timer: 1500,
+            showConfirmButton: false,
+          });
+
+        } catch (err) {
+          showError('❌ Terjadi kesalahan saat menghapus user');
+        }
+      }
+    });
   };
 
   useEffect(() => {
@@ -67,8 +102,8 @@ export default function Users() {
                   <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full 
                     ${user.role === 'admin'
                       ? 'bg-purple-200 text-purple-800 dark:bg-purple-500/20 dark:text-purple-300'
-                      : 'bg-blue-200 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300'}
-                  `}>
+                      : 'bg-blue-200 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300'}`}
+                  >
                     {user.role}
                   </span>
                 </td>

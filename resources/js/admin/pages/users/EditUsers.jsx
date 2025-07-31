@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from '../../axios';
-import { showError, showSuccess } from '../../../src/utils/toast';
+import axios from '../../../axios';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 export default function EditUser() {
   const { id } = useParams();
@@ -9,7 +12,6 @@ export default function EditUser() {
   const [form, setForm] = useState({ name: '', email: '', role: 'User' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     axios
@@ -23,10 +25,16 @@ export default function EditUser() {
           role: res.data.data.role,
         });
       })
-      .catch((err) => {
-        console.error('Gagal mengambil user:', err.response?.data || err.message);
-        alert('Gagal mengambil data user');
-        navigate('/admin/users');
+      .catch(() => {
+        MySwal.fire({
+          icon: 'error',
+          title: 'Gagal Mengambil Data',
+          text: 'Tidak dapat mengambil data user.',
+          background: '#1f2937',
+          color: '#fff',
+          confirmButtonColor: '#ef4444',
+          backdrop: 'rgba(0,0,0,0.4) blur(5px)',
+        }).then(() => navigate('/admin/users'));
       })
       .finally(() => setLoading(false));
   }, [id, navigate]);
@@ -38,17 +46,38 @@ export default function EditUser() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setError(null);
 
     try {
       await axios.put(`/api/admin/users/${id}`, form, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
-      showSuccess('✅ User berhasil diupdate');
-      navigate('/admin/users');
+
+      MySwal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'User berhasil diupdate.',
+        background: '#1f2937',
+        color: '#fff',
+        confirmButtonColor: '#3b82f6',
+        backdrop: 'rgba(0,0,0,0.4) blur(5px)',
+        showClass: { popup: 'animate__animated animate__zoomIn' },
+        hideClass: { popup: 'animate__animated animate__zoomOut' },
+      }).then(() => navigate('/admin/users'));
+
     } catch (err) {
-      console.error('Gagal update user:', err.response?.data || err.message);
-      showError('❌ Terjadi kesalahan saat update user');
+      const errors = err.response?.data?.errors
+        ? Object.values(err.response.data.errors).flat().join("\n")
+        : 'Terjadi kesalahan saat update user.';
+
+      MySwal.fire({
+        icon: 'error',
+        title: 'Gagal Update User',
+        html: `<pre style="text-align:left">${errors}</pre>`,
+        background: '#1f2937',
+        color: '#fff',
+        confirmButtonColor: '#ef4444',
+        backdrop: 'rgba(0,0,0,0.4) blur(5px)',
+      });
     } finally {
       setSaving(false);
     }
@@ -78,12 +107,6 @@ export default function EditUser() {
             ⬅ Kembali
           </Link>
         </div>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>

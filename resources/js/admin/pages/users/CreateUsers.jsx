@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import axios from '../../axios';
+import axios from '../../../axios';
 import { useNavigate, Link } from 'react-router-dom';
-import { showError, showSuccess } from '../../../src/utils/toast';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 export default function CreateUser() {
   const navigate = useNavigate();
@@ -12,7 +15,6 @@ export default function CreateUser() {
     role: 'User',
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -21,18 +23,75 @@ export default function CreateUser() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+
+    if (form.password.length < 6) {
+      MySwal.fire({
+        icon: 'error',
+        title: 'Password Terlalu Pendek',
+        text: 'Password minimal 6 karakter.',
+        showClass: {
+          popup: 'animate__animated animate__fadeInDown',
+        },
+        hideClass: {
+          popup: 'animate__animated animate__fadeOutUp',
+        },
+        background: '#1f2937',
+        color: '#fff',
+        confirmButtonColor: '#3b82f6',
+      });
+      setLoading(false);
+      return;
+    }
 
     try {
       await axios.post('/api/admin/users', form, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
 
-      showSuccess('✅ User berhasil ditambahkan');
-      navigate('/admin/users');
+      MySwal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'User berhasil ditambahkan.',
+        background: '#1f2937',
+        color: '#fff',
+        showClass: {
+          popup: 'animate__animated animate__zoomIn',
+        },
+        hideClass: {
+          popup: 'animate__animated animate__zoomOut',
+        },
+        backdrop: `
+          rgba(0,0,0,0.4)
+          blur(5px)
+        `,
+        confirmButtonColor: '#3b82f6',
+      }).then(() => {
+        navigate('/admin/users');
+      });
+
     } catch (err) {
-      console.error('Gagal menambahkan user:', err.response?.data || err.message);
-      showError('❌ Terjadi kesalahan saat menambahkan user');
+      const errors = err.response?.data?.errors
+        ? Object.values(err.response.data.errors).flat().join("\n")
+        : 'Terjadi kesalahan saat menambahkan user.';
+
+      MySwal.fire({
+        icon: 'error',
+        title: 'Gagal Menambahkan User',
+        html: `<pre style="text-align:left">${errors}</pre>`,
+        background: '#1f2937',
+        color: '#fff',
+        confirmButtonColor: '#ef4444',
+        showClass: {
+          popup: 'animate__animated animate__fadeInDown',
+        },
+        hideClass: {
+          popup: 'animate__animated animate__fadeOutUp',
+        },
+        backdrop: `
+          rgba(0,0,0,0.4)
+          blur(5px)
+        `,
+      });
     } finally {
       setLoading(false);
     }
@@ -54,12 +113,6 @@ export default function CreateUser() {
             ⬅ Kembali
           </Link>
         </div>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
@@ -96,7 +149,7 @@ export default function CreateUser() {
               value={form.password}
               onChange={handleChange}
               className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition"
-              placeholder="Password"
+              placeholder="Password minimal 6 karakter"
               required
             />
           </div>

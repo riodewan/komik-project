@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
-import axios from '../../axios';
+import axios from '../../../axios';
 import { useNavigate, Link } from 'react-router-dom';
-import { showError, showSuccess } from '../../../src/utils/toast';
+import { motion } from 'framer-motion';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 export default function CreateComic() {
   const navigate = useNavigate();
@@ -23,7 +27,15 @@ export default function CreateComic() {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     })
     .then(res => setGenres(res.data.data || res.data))
-    .catch(err => console.error('Gagal load genre', err));
+    .catch(() => {
+      MySwal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: 'Tidak bisa memuat genre.',
+        background: '#1f2937',
+        color: '#fff'
+      });
+    });
   }, []);
 
   const handleChange = (e) => {
@@ -52,6 +64,15 @@ export default function CreateComic() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.title.trim()) {
+      MySwal.fire({ icon: 'warning', title: 'Judul wajib diisi!', background: '#1f2937', color: '#fff' });
+      return;
+    }
+    if (form.genre_ids.length === 0) {
+      MySwal.fire({ icon: 'warning', title: 'Pilih minimal 1 genre!', background: '#1f2937', color: '#fff' });
+      return;
+    }
+
     setLoading(true);
     const formData = new FormData();
     for (let key in form) {
@@ -70,11 +91,21 @@ export default function CreateComic() {
           'Content-Type': 'multipart/form-data'
         }
       });
-      showSuccess('✅ Komik berhasil ditambahkan');
-      navigate('/admin/comics');
-    } catch (err) {
-      console.error(err.response?.data);
-      showError('❌ Gagal menambahkan komik');
+      MySwal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'Komik berhasil ditambahkan.',
+        background: '#1f2937',
+        color: '#fff'
+      }).then(() => navigate('/admin/comics'));
+    } catch {
+      MySwal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: 'Terjadi kesalahan saat menambahkan komik.',
+        background: '#1f2937',
+        color: '#fff'
+      });
     } finally {
       setLoading(false);
     }
@@ -140,7 +171,6 @@ export default function CreateComic() {
           <option value="Hiatus">Hiatus</option>
         </select>
 
-        {/* ✅ Multi-select genre */}
         <div>
           <label className="block mb-1 text-sm font-medium dark:text-gray-300">Pilih Genre</label>
           <select
@@ -157,18 +187,22 @@ export default function CreateComic() {
           <p className="text-xs text-gray-500 mt-1">Tekan CTRL/CMD + Klik untuk memilih banyak genre</p>
         </div>
 
-        {/* ✅ Cover preview */}
         <div>
           <label className="block mb-1 text-sm font-medium dark:text-gray-300">Cover Image</label>
           <input
             type="file"
+            accept="image/*"
             onChange={(e) => handleCover(e.target.files[0])}
             className="block w-full text-sm"
           />
           {coverPreview && (
-            <div className="mt-3">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mt-3"
+            >
               <img src={coverPreview} alt="Preview" className="w-40 h-56 object-cover rounded shadow" />
-            </div>
+            </motion.div>
           )}
         </div>
 
@@ -176,8 +210,9 @@ export default function CreateComic() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-gradient-to-r from-green-600 to-emerald-500 hover:opacity-90 text-white px-6 py-2 rounded shadow transition disabled:opacity-50"
+            className="bg-gradient-to-r from-green-600 to-emerald-500 hover:opacity-90 text-white px-6 py-2 rounded shadow transition disabled:opacity-50 flex items-center gap-2"
           >
+            {loading && <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>}
             {loading ? 'Menyimpan...' : '💾 Simpan'}
           </button>
         </div>

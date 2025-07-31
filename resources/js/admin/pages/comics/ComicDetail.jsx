@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios from '../../axios';
-import { showError, showSuccess } from '../../../src/utils/toast';
+import axios from '../../../axios';
 import { motion } from 'framer-motion';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 export default function ComicDetail() {
   const { id } = useParams();
@@ -19,20 +20,61 @@ export default function ComicDetail() {
       setComic(data);
       setChapters(data.chapters || []);
     })
-    .catch(() => showError('Gagal mengambil data komik'));
+    .catch(() => {
+      Swal.fire('Error', 'Gagal mengambil data komik', 'error');
+    });
+  };
+
+  const handleDeleteComic = () => {
+    Swal.fire({
+      title: 'Yakin ingin hapus komik?',
+      text: 'Semua chapter akan ikut terhapus!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal',
+      confirmButtonColor: '#e3342f',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios.delete(`/api/admin/comics/${id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        })
+        .then(() => {
+          Swal.fire('Terhapus!', 'Komik berhasil dihapus.', 'success');
+          navigate('/admin/comics');
+        })
+        .catch(() => {
+          Swal.fire('Error', 'Gagal menghapus komik.', 'error');
+        });
+      }
+    });
   };
 
   const handleDeleteChapter = (chapterId) => {
-    if (!confirm('Yakin ingin menghapus chapter ini?')) return;
-
-    axios.delete(`/api/admin/chapters/${chapterId}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
-    .then(() => {
-      setChapters(prev => prev.filter(ch => ch.id !== chapterId));
-      showSuccess('Chapter berhasil dihapus');
-    })
-    .catch(() => showError('Gagal menghapus chapter'));
+    Swal.fire({
+      title: 'Hapus Chapter?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Ya, hapus',
+      cancelButtonText: 'Batal',
+      background: '#1f2937',
+      color: '#fff'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios.delete(`/api/admin/chapters/${chapterId}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        })
+        .then(() => {
+          setChapters(prev => prev.filter(ch => ch.id !== chapterId));
+          Swal.fire('Berhasil!', 'Chapter berhasil dihapus.', 'success');
+        })
+        .catch(() => {
+          Swal.fire('Error', 'Gagal menghapus chapter.', 'error');
+        });
+      }
+    });
   };
 
   useEffect(() => {
@@ -64,7 +106,7 @@ export default function ComicDetail() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.1, duration: 0.4 }}
       >
-        {comic.cover_image && (
+        {comic.cover_image ? (
           <motion.img
             src={`/storage/${comic.cover_image}`}
             alt={comic.title}
@@ -72,6 +114,10 @@ export default function ComicDetail() {
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.3 }}
           />
+        ) : (
+          <div className="w-60 h-80 bg-gray-300 dark:bg-gray-700 flex items-center justify-center rounded-xl text-gray-500 dark:text-gray-400">
+            No Cover
+          </div>
         )}
         <div className="flex-1">
           <h1 className="text-3xl font-bold mb-2 text-gray-800 dark:text-white">{comic.title}</h1>
@@ -98,15 +144,24 @@ export default function ComicDetail() {
 
           <p className="text-gray-500 dark:text-gray-400">{comic.description || 'Tidak ada deskripsi.'}</p>
 
-          <Link
-            to={`/admin/comics/edit/${comic.id}`}
-            className="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            ✏️ Edit Komik
-          </Link>
+          <div className="flex gap-3 mt-4">
+            <Link
+              to={`/admin/comics/edit/${comic.id}`}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              ✏️ Edit Komik
+            </Link>
+            <button
+              onClick={handleDeleteComic}
+              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              🗑️ Hapus Komik
+            </button>
+          </div>
         </div>
       </motion.div>
 
+      {/* Daftar Chapter */}
       <motion.div
         className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4"
         initial={{ opacity: 0 }}
@@ -114,7 +169,9 @@ export default function ComicDetail() {
         transition={{ delay: 0.2, duration: 0.4 }}
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">Daftar Chapter</h2>
+          <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
+            Daftar Chapter ({chapters.length})
+          </h2>
           <Link
             to={`/admin/comics/${comic.id}/chapters/create`}
             className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition"

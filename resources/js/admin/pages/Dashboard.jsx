@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from '../axios';
+import axios from '../../axios';
 import { Card, CardContent } from '../components/ui/Card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
 

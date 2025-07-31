@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from '../../axios';
-import { showSuccess, showError } from '../../../src/utils/toast';
+import axios from '../../../axios';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 export default function EditChapter() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [form, setForm] = useState({ title: '', comic_id: null });
-  const [images, setImages] = useState([]);      // gambar lama
-  const [newImages, setNewImages] = useState([]); // file baru
-  const [preview, setPreview] = useState([]);    // preview gambar baru
+  const [images, setImages] = useState([]);
+  const [newImages, setNewImages] = useState([]);
+  const [preview, setPreview] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,8 +26,8 @@ export default function EditChapter() {
       setImages(res.data.images || []);
       setLoading(false);
     })
-    .catch(err => {
-      console.error(err);
+    .catch(() => {
+      Swal.fire('Error', 'Gagal memuat data chapter', 'error');
       setLoading(false);
     });
   }, [id]);
@@ -34,16 +35,26 @@ export default function EditChapter() {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleImageDelete = (imgId) => {
-    if (!confirm('Yakin ingin menghapus gambar ini?')) return;
-
-    axios.delete(`/api/admin/chapters/images/${imgId}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
-    .then(() => {
-      setImages(prev => prev.filter(img => img.id !== imgId));
-      showSuccess('Gambar dihapus');
-    })
-    .catch(() => showError('Gagal hapus gambar'));
+    Swal.fire({
+      title: 'Hapus gambar ini?',
+      text: 'Tindakan ini tidak bisa dibatalkan.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#e3342f',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Ya, Hapus'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios.delete(`/api/admin/chapters/images/${imgId}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        })
+        .then(() => {
+          setImages(prev => prev.filter(img => img.id !== imgId));
+          Swal.fire('Berhasil!', 'Gambar dihapus.', 'success');
+        })
+        .catch(() => Swal.fire('Error', 'Gagal menghapus gambar', 'error'));
+      }
+    });
   };
 
   const handleNewImages = (e) => {
@@ -89,12 +100,15 @@ export default function EditChapter() {
       }
     })
     .then(() => {
-      showSuccess('Chapter berhasil diupdate');
-      navigate(`/admin/comics/${form.comic_id}`);
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'Chapter berhasil diperbarui.',
+        confirmButtonColor: '#4f46e5'
+      }).then(() => navigate(`/admin/comics/${form.comic_id}`));
     })
-    .catch(err => {
-      console.error("Update error:", err.response?.data || err.message);
-      showError('Gagal update chapter');
+    .catch(() => {
+      Swal.fire('Error', 'Gagal update chapter', 'error');
     });
   };
 
@@ -164,7 +178,6 @@ export default function EditChapter() {
               className="w-full bg-gray-700 text-white p-2 rounded"
             />
 
-            {/* Preview */}
             {preview.length > 0 && (
               <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="newImages" direction="horizontal">
@@ -188,7 +201,6 @@ export default function EditChapter() {
                                 alt={`Preview ${idx}`}
                                 className="w-32 h-40 object-cover rounded border border-gray-600"
                               />
-                              {/* Tombol Hapus */}
                               <button
                                 type="button"
                                 onClick={() => removeNewImage(idx)}

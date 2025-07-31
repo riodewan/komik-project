@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from '../../axios';
+import axios from '../../../axios';
 import { motion } from 'framer-motion';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { showSuccess, showError } from '../../../src/utils/toast';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 export default function CreateChapter() {
   const { id } = useParams();
@@ -39,7 +40,6 @@ export default function CreateChapter() {
     }
   };
 
-  // ✅ Hapus gambar sebelum upload
   const removeImage = (index) => {
     const newFiles = [...images];
     const newPreview = [...preview];
@@ -49,7 +49,6 @@ export default function CreateChapter() {
     setPreview(newPreview);
   };
 
-  // ✅ Reorder gambar saat drag & drop
   const onDragEnd = (result) => {
     if (!result.destination) return;
     const fromIndex = result.source.index;
@@ -70,6 +69,11 @@ export default function CreateChapter() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (images.length === 0) {
+      Swal.fire('Peringatan', 'Tambahkan minimal 1 gambar untuk chapter.', 'warning');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('title', title);
     images.forEach((img) => {
@@ -93,11 +97,15 @@ export default function CreateChapter() {
         }
       });
 
-      showSuccess('Chapter berhasil ditambahkan');
-      navigate(`/admin/comics/${id}`);
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'Chapter berhasil ditambahkan.',
+        confirmButtonColor: '#4f46e5'
+      }).then(() => navigate(`/admin/comics/${id}`));
     } catch (err) {
       console.error(err.response?.data);
-      showError('Gagal menambahkan chapter');
+      Swal.fire('Error', 'Gagal menambahkan chapter.', 'error');
     } finally {
       setLoading(false);
       setUploadProgress(0);
@@ -135,7 +143,7 @@ export default function CreateChapter() {
             />
           </div>
 
-          {/* ✅ Drag & Drop Upload */}
+          {/* Drag & Drop Upload */}
           <div
             className={`border-2 border-dashed rounded-lg p-6 text-center transition ${
               dragActive ? 'border-purple-500 bg-purple-500/10' : 'border-gray-600 bg-gray-800/50'
@@ -165,7 +173,6 @@ export default function CreateChapter() {
             )}
           </div>
 
-          {/* ✅ Sortable Preview */}
           {preview.length > 0 && (
             <DragDropContext onDragEnd={onDragEnd}>
               <Droppable droppableId="preview-list" direction="horizontal">
