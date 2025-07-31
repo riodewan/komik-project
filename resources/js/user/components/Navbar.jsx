@@ -7,23 +7,24 @@ export default function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false);
 
   return (
-    <nav className="bg-gray-950 text-white border-b border-gray-800 relative">
-      <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
-        {/* ✅ Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="Logo" className="h-8" />
-          <span className="font-bold text-lg">Shinigami</span>
-        </Link>
+    <nav className="bg-gray-950 text-white relative border-b border-gray-800">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        {/* ✅ Kiri: Logo dan Menu */}
+        <div className="flex items-center gap-10">
+          <Link to="/" className="flex items-center gap-2">
+            <img src="https://cdn.jsdelivr.net/gh/shinigamiscans/static@latest/emotes/3.webp" alt="Logo" className="h-8" />
+            <span className="font-bold text-lg">Shinigami</span>
+          </Link>
 
-        {/* ✅ Desktop Menu */}
-        <div className="hidden md:flex items-center gap-6">
-          <Link to="/" className="hover:text-purple-400 transition">Home</Link>
-          <Link to="/explore" className="hover:text-purple-400 transition">Explore</Link>
-          <Link to="/library" className="hover:text-purple-400 transition">Library</Link>
-          <Link to="/search" className="hover:text-purple-400 transition">Search</Link>
+          <div className="hidden md:flex items-center gap-6">
+            <Link to="/" className="hover:text-purple-400 transition">Home</Link>
+            <Link to="/explore" className="hover:text-purple-400 transition">Explore</Link>
+            <Link to="/library" className="hover:text-purple-400 transition">Library</Link>
+            <Link to="/search" className="hover:text-purple-400 transition">Search</Link>
+          </div>
         </div>
 
-        {/* ✅ Search Bar (Desktop Only) */}
+        {/* ✅ Tengah: Search Bar (Desktop Only) */}
         <div className="flex-1 mx-4 hidden md:block">
           <div className="relative">
             <input
@@ -43,16 +44,9 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* ✅ Mobile Hamburger */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden p-2 rounded bg-gray-800 hover:bg-gray-700"
-        >
-          ☰
-        </button>
-
-        {/* ✅ Profile & Dark Mode */}
+        {/* ✅ Kanan: Dark Mode, Profile, Mobile Menu */}
         <div className="flex items-center gap-3 relative">
+          {/* Dark Mode Toggle */}
           <button
             onClick={() => setDarkMode(!darkMode)}
             className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition"
@@ -60,7 +54,7 @@ export default function Navbar() {
             {darkMode ? "🌙" : "☀️"}
           </button>
 
-          {/* ✅ Profile Dropdown */}
+          {/* Profile Dropdown */}
           <div className="relative">
             <button
               onClick={() => setProfileOpen(!profileOpen)}
@@ -76,6 +70,14 @@ export default function Navbar() {
               </div>
             )}
           </div>
+
+          {/* Mobile Toggle */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="md:hidden p-2 rounded bg-gray-800 hover:bg-gray-700"
+          >
+            ☰
+          </button>
         </div>
       </div>
 

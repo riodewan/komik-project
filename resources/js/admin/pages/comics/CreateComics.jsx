@@ -14,6 +14,7 @@ export default function CreateComic() {
     description: '',
     author: '',
     artist: '',
+    type: 'Manga',
     status: 'Ongoing',
     genre_ids: []
   });
@@ -159,6 +160,17 @@ export default function CreateComic() {
             className="w-full p-3 border rounded bg-gray-50 dark:bg-gray-800 dark:text-gray-100"
           />
         </div>
+
+        <select
+          name="type"
+          onChange={handleChange}
+          value={form.type}
+          className="w-full p-3 border rounded bg-gray-50 dark:bg-gray-800 dark:text-gray-100"
+        >
+          <option value="Manga">Manga</option>
+          <option value="Manhwa">Manhwa</option>
+          <option value="Manhua">Manhua</option>
+        </select>
 
         <select
           name="status"

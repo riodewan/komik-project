@@ -1,20 +1,85 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import AdminRoutes from "./admin/AdminRoutes";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
+// Admin
+import Layout from "./admin/components/Layout";
+import PrivateRoute from "./admin/components/PrivateRoute";
+import Dashboard from "./admin/pages/Dashboard";
+import Users from "./admin/pages/users/Users";
+import CreateUser from "./admin/pages/users/CreateUsers";
+import EditUser from "./admin/pages/users/EditUsers";
+import Comics from "./admin/pages/comics/Comics";
+import CreateComic from "./admin/pages/comics/CreateComics";
+import EditComic from "./admin/pages/comics/EditComics";
+import ComicDetail from "./admin/pages/comics/ComicDetail";
+import CreateChapter from "./admin/pages/chapters/CreateChapter";
+import EditChapter from "./admin/pages/chapters/EditChapter";
+import Genres from "./admin/pages/genres/Genres";
+import CreateGenre from "./admin/pages/genres/CreateGenres";
+import EditGenre from "./admin/pages/genres/EditGenres";
+import Announcements from "./admin/pages/announcements/Announcements";
+import CreateAnnouncement from "./admin/pages/announcements/CreateAnnouncement";
+import EditAnnouncement from "./admin/pages/announcements/EditAnnouncement";
+
+// User
 import HomePage from "./user/pages/Home";
+import ComicDetailHome from "./user/pages/HomeDetailComic";
+import ChapterReader from "./user/pages/ChapterReader";
+import AllAnnouncements from "./user/pages/AllAnnouncement";
+import AnnouncementDetail from "./user/pages/AnnouncementDetail";
+
+// Auth & Errors
 import Login from "./admin/pages/Login";
+import Error404 from "./src/pages/Error404"; // ✅ disesuaikan
 
 export default function App() {
   return (
     <Router>
       <Routes>
-        {/* Route utama user */}
+        {/* ==== USER SIDE ==== */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/comics/:id" element={<ComicDetailHome />} />
+        <Route path="/comics/:id/chapters/:chapterId" element={<ChapterReader />} />
+        <Route path="/announcements" element={<AllAnnouncements />} />
+        <Route path="/announcements/:id" element={<AnnouncementDetail />} />
 
-        {/* Route login */}
+        {/* ==== AUTH ==== */}
         <Route path="/login" element={<Login />} />
 
-        {/* ✅ Admin Routes sebagai elemen */}
-        <Route path="/*" element={<AdminRoutes />} />
+        {/* ==== ADMIN SIDE (PROTECTED) ==== */}
+        <Route
+          path="/admin/*"
+          element={
+            <PrivateRoute>
+              <Layout />
+            </PrivateRoute>
+          }
+        >
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
+
+          <Route path="users" element={<Users />} />
+          <Route path="users/create" element={<CreateUser />} />
+          <Route path="users/edit/:id" element={<EditUser />} />
+
+          <Route path="comics" element={<Comics />} />
+          <Route path="comics/create" element={<CreateComic />} />
+          <Route path="comics/edit/:id" element={<EditComic />} />
+          <Route path="comics/:id" element={<ComicDetail />} />
+
+          <Route path="comics/:id/chapters/create" element={<CreateChapter />} />
+          <Route path="comics/:id/chapters/edit/:chapterId" element={<EditChapter />} />
+
+          <Route path="genres" element={<Genres />} />
+          <Route path="genres/create" element={<CreateGenre />} />
+          <Route path="genres/edit/:id" element={<EditGenre />} />
+
+          <Route path="announcements" element={<Announcements />} />
+          <Route path="announcements/create" element={<CreateAnnouncement />} />
+          <Route path="announcements/edit/:id" element={<EditAnnouncement />} />
+        </Route>
+
+        {/* ==== FALLBACK ==== */}
+        <Route path="*" element={<Error404 />} />
       </Routes>
     </Router>
   );

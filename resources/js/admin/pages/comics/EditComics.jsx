@@ -12,6 +12,7 @@ export default function EditComic() {
     description: '',
     author: '',
     artist: '',
+    type: 'Manga',
     status: 'Ongoing',
     genre_ids: [],
     cover_image: ''
@@ -43,6 +44,7 @@ export default function EditComic() {
           description: comic.description || '',
           author: comic.author || '',
           artist: comic.artist || '',
+          type: comic.type || 'Manga',
           status: comic.status || 'Ongoing',
           genre_ids: comic.genres ? comic.genres.map(g => String(g.id)) : [],
           cover_image: comic.cover_image || ''
@@ -63,11 +65,7 @@ export default function EditComic() {
   };
 
   const handleGenreChange = (e) => {
-    const options = e.target.options;
-    const selected = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) selected.push(parseInt(options[i].value)); // ✅ pastikan angka
-    }
+    const selected = Array.from(e.target.selectedOptions, option => option.value);
     setForm({ ...form, genre_ids: selected });
   };
 
@@ -163,6 +161,17 @@ export default function EditComic() {
             className="w-full p-3 border rounded bg-gray-50 dark:bg-gray-800 dark:text-gray-100"
           />
         </div>
+
+        <select
+          name="type"
+          value={form.type}
+          onChange={handleChange}
+          className="w-full p-3 border rounded bg-gray-50 dark:bg-gray-800 dark:text-gray-100"
+        >
+          <option value="Manga">Manga</option>
+          <option value="Manhwa">Manhwa</option>
+          <option value="Manhua">Manhua</option>
+        </select>
 
         <select
           name="status"

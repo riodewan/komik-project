@@ -125,6 +125,12 @@ export default function Comics() {
                       No Cover
                     </div>
                   )}
+                  <div className={`absolute top-2 left-2 px-2 py-0.5 rounded-full text-xs shadow 
+                    ${comic.type === 'Manhwa'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-yellow-500 text-black'}`}>
+                    {comic.type}
+                  </div>
                   <div className={`absolute top-2 right-2 px-2 py-0.5 rounded-full text-xs shadow 
                     ${comic.status === 'Completed'
                       ? 'bg-green-600 text-white'

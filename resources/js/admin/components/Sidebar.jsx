@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FiHome, FiUsers, FiBookOpen, FiLayers, FiMenu, FiX } from 'react-icons/fi';
+import { FiHome, FiUsers, FiBookOpen, FiLayers, FiMenu, FiX, FiSpeaker } from 'react-icons/fi';
 
 const menu = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: <FiHome size={20} /> },
   { name: 'User', path: '/admin/users', icon: <FiUsers size={20} /> },
   { name: 'Comic', path: '/admin/comics', icon: <FiBookOpen size={20} /> },
   { name: 'Genre', path: '/admin/genres', icon: <FiLayers size={20} /> },
+  { name: 'Pengumuman', path: '/admin/announcements', icon: <FiSpeaker size={20} /> },
 ];
 
 export default function Sidebar() {

@@ -123,6 +123,7 @@ export default function ComicDetail() {
           <h1 className="text-3xl font-bold mb-2 text-gray-800 dark:text-white">{comic.title}</h1>
           <p className="text-gray-600 dark:text-gray-300 mb-1"><strong>Penulis:</strong> {comic.author || '-'}</p>
           <p className="text-gray-600 dark:text-gray-300 mb-1"><strong>Artist:</strong> {comic.artist || '-'}</p>
+          <p className="text-gray-600 dark:text-gray-300 mb-3"><strong>Type:</strong> {comic.type}</p>
           <p className="text-gray-600 dark:text-gray-300 mb-3"><strong>Status:</strong> {comic.status}</p>
           
           {/* Genre Badge */}

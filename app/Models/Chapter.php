@@ -23,4 +23,14 @@ class Chapter extends Model
         return $this->hasMany(ChapterImage::class)->orderBy('order');
     }
 
+    public function readingHistory()
+    {
+        return $this->hasMany(ReadingHistory::class);
+    }
+    
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
 }

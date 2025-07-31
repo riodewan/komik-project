@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('cover_image')->nullable();
             $table->string('author')->nullable();
             $table->string('artist')->nullable();
+            $table->enum('type', ['Manga', 'Manhwa', 'Manhua'])->default('Manga');
             $table->enum('status', ['Ongoing', 'Completed', 'Hiatus'])->default('Ongoing');
             $table->timestamps();
         });

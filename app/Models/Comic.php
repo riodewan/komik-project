@@ -11,7 +11,7 @@ class Comic extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title', 'slug', 'description', 'cover_image', 'author', 'artist', 'status'
+        'title', 'slug', 'description', 'cover_image', 'author', 'artist', 'type','status'
     ];
 
     public function chapters()
@@ -21,5 +21,20 @@ class Comic extends Model
 
     public function genres() {
         return $this->belongsToMany(Genre::class, 'comic_genre');
+    }
+
+    public function bookmarks()
+    {
+        return $this->hasMany(Bookmark::class);
+    }
+
+    public function readingHistory()
+    {
+        return $this->hasMany(ReadingHistory::class);
+    }
+
+    public function latestChapter()
+    {
+        return $this->hasOne(Chapter::class)->latestOfMany();
     }
 }

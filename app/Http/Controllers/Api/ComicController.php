@@ -25,6 +25,7 @@ class ComicController extends Controller
             'description' => 'nullable|string',
             'author' => 'nullable|string|max:255',
             'artist' => 'nullable|string|max:255',
+            'type' => 'required|in:Manga,Manhwa,Manhua',
             'status' => 'required|string',
             'cover_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'genre_ids' => 'array',
@@ -56,6 +57,7 @@ class ComicController extends Controller
             'description' => 'nullable|string',
             'author' => 'nullable|string|max:255',
             'artist' => 'nullable|string|max:255',
+            'type' => 'required|in:Manga,Manhwa,Manhua',
             'status' => 'required|string',
             'cover_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'genre_ids' => 'array',
@@ -104,5 +106,17 @@ class ComicController extends Controller
         $comic->delete();
 
         return response()->json(['message' => 'Comic deleted successfully']);
+    }
+
+    public function latestChapter()
+    {
+        $comics = Comic::with(['latestChapter'])->get();
+
+        // Filter hanya komik yang memiliki chapter
+        $comics = $comics->filter(function ($comic) {
+            return $comic->latestChapter !== null;
+        })->values();
+
+        return response()->json($comics);
     }
 }
