@@ -1,21 +1,37 @@
 import { useEffect, useState } from "react";
 import axios from "../../axios";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 
-export default function CommentSection({ comicId }) {
+const MySwal = withReactContent(Swal);
+
+export default function CommentSection({ chapterId }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(true);
+  const [sort, setSort] = useState("latest");
+  const token = localStorage.getItem("token");
 
   const fetchComments = () => {
     axios
-      .get(`/api/comics/${comicId}/comments`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+      .get(`/api/chapters/${chapterId}/comments`)
+      .then((res) => {
+        const data = res.data.data || res.data;
+        const sorted = sortComments(data);
+        setComments(sorted);
       })
-      .then((res) => setComments(res.data))
       .catch(() => setComments([]))
       .finally(() => setLoading(false));
+  };
+
+  const sortComments = (arr) => {
+    if (sort === "latest") {
+      return [...arr].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+    if (sort === "oldest") {
+      return [...arr].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    }
+    return arr;
   };
 
   const handleSubmit = (e) => {
@@ -24,45 +40,84 @@ export default function CommentSection({ comicId }) {
 
     axios
       .post(
-        `/api/comics/${comicId}/comments`,
-        { content: newComment },
+        `/api/comments`,
+        { content: newComment, chapter_id: chapterId },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       )
       .then((res) => {
-        setComments((prev) => [res.data, ...prev]);
+        MySwal.fire({
+          icon: "success",
+          title: "Komentar dikirim!",
+          toast: true,
+          position: "top-end",
+          timer: 2000,
+          showConfirmButton: false,
+        });
         setNewComment("");
+        fetchComments(); // Refresh comment
       })
-      .catch(() => alert("Gagal menambahkan komentar"));
+      .catch(() => {
+        MySwal.fire({
+          icon: "error",
+          title: "Gagal kirim komentar",
+          text: "Silakan coba lagi nanti",
+        });
+      });
   };
 
   useEffect(() => {
     fetchComments();
-  }, [comicId]);
+  }, [chapterId, sort]);
 
   return (
-    <div className="mt-10 bg-gray-900 rounded-xl p-6">
-      <h3 className="text-xl font-semibold mb-4 text-white">💬 Komentar</h3>
+    <div className="mt-10 bg-gray-900 rounded-xl p-6 text-white">
+      <h3 className="text-2xl font-semibold mb-4">💬 {comments.length} Komentar</h3>
 
-      {/* Form Komentar */}
-      <form onSubmit={handleSubmit} className="mb-6">
-        <textarea
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          rows={3}
-          placeholder="Tulis komentar..."
-          className="w-full p-3 rounded bg-gray-800 text-white border border-gray-700 resize-none focus:outline-none"
-        />
+      {token ? (
+        <form onSubmit={handleSubmit} className="mb-6">
+          <textarea
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            rows={3}
+            placeholder="Tulis komentar..."
+            className="w-full p-3 rounded bg-gray-800 border border-gray-700 resize-none focus:outline-none text-white"
+          />
+          <div className="flex justify-end mt-2">
+            <button
+              type="submit"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
+            >
+              Kirim
+            </button>
+          </div>
+        </form>
+      ) : (
+        <p className="text-gray-400 mb-4">🔒 Login untuk mengirim komentar.</p>
+      )}
+
+      {/* Sort Option */}
+      <div className="flex gap-2 mb-4">
         <button
-          type="submit"
-          className="mt-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded transition"
+          onClick={() => setSort("latest")}
+          className={`px-3 py-1 rounded text-sm ${
+            sort === "latest" ? "bg-purple-600" : "bg-gray-800"
+          }`}
         >
-          Kirim Komentar
+          Terbaru
         </button>
-      </form>
+        <button
+          onClick={() => setSort("oldest")}
+          className={`px-3 py-1 rounded text-sm ${
+            sort === "oldest" ? "bg-purple-600" : "bg-gray-800"
+          }`}
+        >
+          Terlama
+        </button>
+      </div>
 
       {/* Daftar Komentar */}
       {loading ? (
@@ -71,23 +126,31 @@ export default function CommentSection({ comicId }) {
         <p className="text-gray-400">Belum ada komentar.</p>
       ) : (
         <ul className="space-y-4">
-          {comments.map((comment) => (
-            <li key={comment.id} className="bg-gray-800 p-4 rounded shadow-sm">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-sm font-bold text-white">
-                  {comment.user.name[0]}
+          {comments.map((comment, index) => {
+            if (!comment || !comment.id) return null; // Abaikan jika tidak valid
+
+            return (
+              <li key={comment.id || `comment-${index}`} className="bg-gray-800 p-4 rounded shadow-sm">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-9 h-9 rounded-full bg-purple-600 flex items-center justify-center text-sm font-bold">
+                    {comment.user?.name?.charAt(0) || "?"}
+                  </div>
+                  <div>
+                    <p className="font-semibold">{comment.user?.name || "User"}</p>
+                    <p className="text-xs text-gray-400">
+                      {new Date(comment.created_at).toLocaleString()}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-white">{comment.user.name}</p>
-                  <p className="text-xs text-gray-400">
-                    {new Date(comment.created_at).toLocaleString()}
-                  </p>
+                <div className="text-gray-200 whitespace-pre-line">{comment.content}</div>
+                <div className="text-sm mt-2 text-gray-400 hover:underline cursor-pointer">
+                  🔁 Reply
                 </div>
-              </div>
-              <p className="text-gray-200">{comment.content}</p>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
+
       )}
     </div>
   );

@@ -22,7 +22,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', // Tambahkan role ke dalam fillable
+        'username',
+        'avatar',
+        'bio',
+        'role',
     ];
 
     /**

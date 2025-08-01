@@ -26,9 +26,11 @@ import ComicDetailHome from "./user/pages/HomeDetailComic";
 import ChapterReader from "./user/pages/ChapterReader";
 import AllAnnouncements from "./user/pages/AllAnnouncement";
 import AnnouncementDetail from "./user/pages/AnnouncementDetail";
+import Profile from "./user/pages/Profile";
 
 // Auth & Errors
 import Login from "./admin/pages/Login";
+import Register from './admin/pages/Register';
 import Error404 from "./src/pages/Error404"; // ✅ disesuaikan
 
 export default function App() {
@@ -41,9 +43,11 @@ export default function App() {
         <Route path="/comics/:id/chapters/:chapterId" element={<ChapterReader />} />
         <Route path="/announcements" element={<AllAnnouncements />} />
         <Route path="/announcements/:id" element={<AnnouncementDetail />} />
+        <Route path="/profile" element={<Profile />} />
 
         {/* ==== AUTH ==== */}
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         {/* ==== ADMIN SIDE (PROTECTED) ==== */}
         <Route

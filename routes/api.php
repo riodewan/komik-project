@@ -17,28 +17,6 @@ use App\Models\User;
 use App\Models\Comic;
 use App\Models\Chapter;
 
-Route::post('/login', function (Request $request) {
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
-
-    $user = User::where('email', $request->email)->first();
-
-    if (! $user || ! Hash::check($request->password, $user->password)) {
-        return response()->json(['message' => 'Invalid credentials'], 422);
-    }
-
-    // Generate token Sanctum
-    $token = $user->createToken('auth_token')->plainTextToken;
-
-    return response()->json([
-        'message' => 'Login success',
-        'token' => $token,
-        'user' => $user,
-    ]);
-});
-
 Route::prefix('admin')->group(function () {
     Route::apiResource('users', UserController::class);
     Route::apiResource('comics', ComicController::class);
@@ -63,19 +41,23 @@ Route::prefix('admin')->group(function () {
     });
 });
 
-//bookmark
-Route::get('/bookmarks', [BookmarkController::class, 'index']);
-Route::post('/bookmarks', [BookmarkController::class, 'store']);
-Route::delete('/bookmarks/{id}', [BookmarkController::class, 'destroy']);
-
-//reading history
-Route::get('/reading-history', [ReadingHistoryController::class, 'index']);
-Route::post('/reading-history', [ReadingHistoryController::class, 'store']);
-
 //comment
 Route::get('/chapters/{chapterId}/comments', [CommentController::class, 'index']);
-Route::post('/comments', [CommentController::class, 'store']);
-Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Comment
+    Route::post('/comments', [CommentController::class, 'store']);
+    Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
+
+    //reading history
+    Route::get('/reading-history', [ReadingHistoryController::class, 'index']);
+    Route::post('/reading-history', [ReadingHistoryController::class, 'store']);
+
+    //bookmark
+    Route::get('/bookmarks', [BookmarkController::class, 'index']);
+    Route::post('/bookmarks', [BookmarkController::class, 'store']);
+    Route::delete('/bookmarks/{id}', [BookmarkController::class, 'destroy']);
+});
 
 // Public Announcements
 Route::get('/announcements', [AnnouncementController::class, 'indexUser']);
@@ -84,6 +66,54 @@ Route::get('/announcements/{id}', [AnnouncementController::class, 'showUser']);
 // Public Comics and Chapters
 Route::get('/last-chapters', [ComicController::class, 'latestChapter']);
 
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return response()->json(['user' => $request->user()]);
+    });
+
+    Route::put('/user', function (Request $request) {
+        $user = $request->user();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'username' => 'nullable|string|max:255|unique:users,username,' . $user->id,
+            'bio' => 'nullable|string',
+            'avatar' => 'nullable|image|max:2048',
+        ]);
+
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $path;
+        }
+
+        $user->update($request->only(['name', 'email', 'username', 'bio']));
+
+        return response()->json(['user' => $user]);
+    });
+
+    Route::post('/change-password', function (Request $request) {
+        $user = $request->user();
+
+        $request->validate([
+            'current' => 'required',
+            'new' => 'required|min:6',
+            'confirm' => 'required|same:new',
+        ]);
+
+        if (!Hash::check($request->current, $user->password)) {
+            return response()->json(['message' => 'Password lama tidak cocok'], 422);
+        }
+
+        $user->password = Hash::make($request->new);
+        $user->save();
+
+        return response()->json(['message' => 'Password berhasil diubah']);
+    });
+});
 
 // Logout
 Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {

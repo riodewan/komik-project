@@ -9,7 +9,14 @@ const MySwal = withReactContent(Swal);
 export default function EditUser() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: '', email: '', role: 'User' });
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    role: 'User',
+    username: '',
+    bio: '',
+    avatar: null
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -19,10 +26,14 @@ export default function EditUser() {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       })
       .then((res) => {
+        const data = res.data.data;
         setForm({
-          name: res.data.data.name,
-          email: res.data.data.email,
-          role: res.data.data.role,
+          name: data.name,
+          email: data.email,
+          role: data.role,
+          username: data.username || '',
+          bio: data.bio || '',
+          avatar: null,
         });
       })
       .catch(() => {
@@ -40,16 +51,31 @@ export default function EditUser() {
   }, [id, navigate]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value, files } = e.target;
+    if (name === 'avatar') {
+      setForm({ ...form, avatar: files[0] });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
 
+    const formData = new FormData();
+    for (const key in form) {
+      if (form[key] !== null) {
+        formData.append(key, form[key]);
+      }
+    }
+
     try {
-      await axios.put(`/api/admin/users/${id}`, form, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      await axios.post(`/api/admin/users/${id}?_method=PUT`, formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       MySwal.fire({
@@ -95,7 +121,6 @@ export default function EditUser() {
     <div className="max-w-2xl mx-auto animate-dashboard-enter">
       <div className="bg-white dark:bg-gray-900 backdrop-blur-xl border border-gray-200 dark:border-gray-700 shadow-xl rounded-2xl p-6 md:p-8">
 
-        {/* ✅ Header + Tombol Back */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">
             Edit Pengguna
@@ -117,7 +142,6 @@ export default function EditUser() {
               value={form.name}
               onChange={handleChange}
               className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition"
-              placeholder="Nama lengkap"
               required
             />
           </div>
@@ -130,8 +154,40 @@ export default function EditUser() {
               value={form.email}
               onChange={handleChange}
               className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition"
-              placeholder="Email"
               required
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
+            <input
+              type="text"
+              name="username"
+              value={form.username}
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label>
+            <textarea
+              name="bio"
+              value={form.bio}
+              onChange={handleChange}
+              rows="3"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition"
+            ></textarea>
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Avatar</label>
+            <input
+              type="file"
+              name="avatar"
+              accept="image/*"
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 outline-none transition"
             />
           </div>
 

@@ -22,9 +22,11 @@ export default function PrivateRoute({ children }) {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        console.log('User Data:', res.data); // ✅ Debug
-        const userRole = (res.data.role || res.data.data?.role || '').toLowerCase();
-        console.log('Detected Role:', userRole);
+        // 🔍 Debugging format role
+        console.log('User data:', res.data);
+
+        // 🧠 Ambil role dari format apapun
+        const userRole = (res.data.user?.role || '').toLowerCase();
 
         setRole(userRole);
         setAuth(true);
@@ -39,13 +41,9 @@ export default function PrivateRoute({ children }) {
     checkAuth();
   }, []);
 
-  if (loading) return <div className="p-4">Loading...</div>;
-
+  if (loading) return <div className="text-white p-4">⏳ Memuat akses...</div>;
   if (!auth) return <Navigate to="/login" replace />;
+  if (role !== 'admin') return <Error403 />;
 
-  if (role && role !== 'admin') {
-    return <Error403 />;
-  }
-
-  return children;
+  return <>{children}</>;
 }
