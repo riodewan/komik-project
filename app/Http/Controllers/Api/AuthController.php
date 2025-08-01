@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -52,5 +54,27 @@ class AuthController extends Controller
             'user' => $user
         ]);
     }
+    
+    public function redirect()
+    {
+        return Socialite::driver('google')->stateless()->redirect();
+    }
 
+    public function callback()
+    {
+        $googleUser = Socialite::driver('google')->stateless()->user();
+
+        $user = User::firstOrCreate([
+            'email' => $googleUser->getEmail(),
+        ], [
+            'name' => $googleUser->getName(),
+            'username' => Str::slug($googleUser->getName()) . Str::random(5),
+            'password' => Hash::make(Str::random(24)),
+            'avatar' => $googleUser->getAvatar(),
+        ]);
+
+        $token = $user->createToken('google-token')->plainTextToken;
+
+        return redirect("http://localhost:5173/google/callback?token={$token}");
+    }
 }

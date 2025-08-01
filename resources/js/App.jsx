@@ -31,6 +31,7 @@ import Profile from "./user/pages/Profile";
 // Auth & Errors
 import Login from "./admin/pages/Login";
 import Register from './admin/pages/Register';
+import GoogleCallback from "./src/pages/GoogleCallback";
 import Error404 from "./src/pages/Error404"; // ✅ disesuaikan
 
 export default function App() {
@@ -47,6 +48,7 @@ export default function App() {
 
         {/* ==== AUTH ==== */}
         <Route path="/login" element={<Login />} />
+        <Route path="/google/callback" element={<GoogleCallback />} />
         <Route path="/register" element={<Register />} />
 
         {/* ==== ADMIN SIDE (PROTECTED) ==== */}

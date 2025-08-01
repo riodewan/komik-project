@@ -67,6 +67,8 @@ Route::get('/announcements/{id}', [AnnouncementController::class, 'showUser']);
 Route::get('/last-chapters', [ComicController::class, 'latestChapter']);
 
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/auth/google/redirect', [AuthController::class, 'redirect']);
+Route::get('/auth/google/callback', [AuthController::class, 'callback']);
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::middleware('auth:sanctum')->group(function () {

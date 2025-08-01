@@ -121,6 +121,16 @@ export default function Login() {
             {loading ? "Loading..." : <><LogIn size={20} /> Masuk</>}
           </button>
         </form>
+        
+        <div className="mt-6 text-center">
+        <a
+          href="http://localhost:8000/api/auth/google/redirect"
+          className="inline-flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition"
+        >
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+          Masuk dengan Google
+        </a>
+      </div>
 
         <div className="mt-6 text-center text-sm text-gray-400">
           Belum punya akun?{' '}
