@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import axios from "../../axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-
+import { motion } from "framer-motion";
 
 function getTimeAgo(dateStr) {
   const date = new Date(dateStr);
@@ -72,7 +72,12 @@ export default function HomeDetailComic() {
       <Navbar />
 
       {/* Header */}
-      <div className="max-w-6xl mx-auto px-4 py-10 flex flex-col md:flex-row gap-8">
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.5 }}
+        className="max-w-6xl mx-auto px-4 py-10 flex flex-col md:flex-row gap-8"
+      >
         <div className="w-full md:w-60">
           <img
             src={`/storage/${comic.cover_image}`}
@@ -118,10 +123,15 @@ export default function HomeDetailComic() {
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Daftar Chapter */}
-      <div className="max-w-6xl mx-auto px-4 pb-20">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="max-w-6xl mx-auto px-4 pb-20"
+      >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">📚 Chapter</h2>
         </div>
@@ -130,33 +140,39 @@ export default function HomeDetailComic() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {comic.chapters
               .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-              .map((chapter) => (
-                <Link
+              .map((chapter, index) => (
+                <motion.div
                   key={chapter.id}
-                  to={`/comics/${comic.id}/chapters/${chapter.id}`}
-                  className="bg-gray-900 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
                 >
-                  {/* Thumbnail */}
-                  <div className="h-40 relative overflow-hidden">
-                    <img
-                      src={`/storage/${chapter.thumbnail || comic.cover_image}`}
-                      alt={chapter.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
+                  <Link
+                    to={`/comics/${comic.id}/chapters/${chapter.id}`}
+                    className="bg-gray-900 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group"
+                  >
+                    {/* Thumbnail */}
+                    <div className="h-40 relative overflow-hidden">
+                      <img
+                        src={`/storage/${chapter.thumbnail || comic.cover_image}`}
+                        alt={chapter.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
 
-                  {/* Info */}
-                  <div className="p-3">
-                    <p className="text-white font-semibold text-sm truncate">{chapter.title}</p>
-                    <p className="text-xs text-gray-400">{getTimeAgo(chapter.created_at)}</p>
-                  </div>
-                </Link>
+                    {/* Info */}
+                    <div className="p-3">
+                      <p className="text-white font-semibold text-sm truncate">{chapter.title}</p>
+                      <p className="text-xs text-gray-400">{getTimeAgo(chapter.created_at)}</p>
+                    </div>
+                  </Link>
+                </motion.div>
               ))}
           </div>
         ) : (
           <p className="text-gray-400 text-sm">Belum ada chapter tersedia.</p>
         )}
-      </div>
+      </motion.div>
       <Footer />
     </div>
   );

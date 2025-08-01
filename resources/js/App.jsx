@@ -27,6 +27,7 @@ import ChapterReader from "./user/pages/ChapterReader";
 import AllAnnouncements from "./user/pages/AllAnnouncement";
 import AnnouncementDetail from "./user/pages/AnnouncementDetail";
 import Profile from "./user/pages/Profile";
+import SearchPage from "./user/pages/SearchPage";
 
 // Auth & Errors
 import Login from "./admin/pages/Login";
@@ -45,6 +46,7 @@ export default function App() {
         <Route path="/announcements" element={<AllAnnouncements />} />
         <Route path="/announcements/:id" element={<AnnouncementDetail />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/search" element={<SearchPage />} />
 
         {/* ==== AUTH ==== */}
         <Route path="/login" element={<Login />} />

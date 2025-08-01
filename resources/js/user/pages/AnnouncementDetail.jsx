@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import axios from "../../axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { motion } from "framer-motion";
 
 export default function AnnouncementDetail() {
   const { id } = useParams();
@@ -38,12 +39,21 @@ export default function AnnouncementDetail() {
   return (
     <div className="bg-gray-950 text-white min-h-screen flex flex-col">
       <Navbar />
-      <div className="max-w-3xl mx-auto px-4 py-8 flex-1">
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-3xl mx-auto px-4 py-8 flex-1"
+      >
         {announcement.banner && (
-          <img
+          <motion.img
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
             src={`/storage/${announcement.banner}`}
             alt="Banner"
-            className="rounded-xl mb-6 w-full object-cover"
+            className="rounded-xl mb-6 w-full object-cover shadow-lg"
           />
         )}
 
@@ -56,7 +66,7 @@ export default function AnnouncementDetail() {
           })}
         </p>
 
-        <div className="prose prose-invert max-w-none">
+        <div className="prose prose-invert max-w-none bg-gray-900 p-4 rounded-xl">
           <div dangerouslySetInnerHTML={{ __html: announcement.content }} />
         </div>
 
@@ -66,7 +76,8 @@ export default function AnnouncementDetail() {
         >
           ⬅ Kembali ke Home
         </Link>
-      </div>
+      </motion.div>
+
       <Footer />
     </div>
   );

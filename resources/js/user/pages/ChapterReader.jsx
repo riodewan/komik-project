@@ -41,56 +41,55 @@ export default function ChapterReader() {
   }
 
   return (
-    <div className="bg-gray-950 text-white min-h-screen flex flex-col">
+    <div className="bg-black text-white min-h-screen flex flex-col">
       <Navbar />
 
-      {/* Header Top Bar */}
-      <div className="bg-gray-900 sticky top-0 z-40 py-3 px-4 flex items-center justify-between shadow-md border-b border-gray-800">
+      {/* Header */}
+      <div className="bg-gray-950 sticky top-0 z-50 px-4 py-2 flex items-center justify-between shadow-md border-b border-gray-800">
         <button
           onClick={() => navigate(-1)}
-          className="text-white text-sm bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-md"
+          className="text-white text-sm bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded"
         >
-          ⬅️ Kembali
+          ⬅ Kembali
         </button>
-        <h1 className="text-lg font-bold text-center truncate w-1/2">
+        <h1 className="text-base font-bold truncate w-1/2 text-center">
           {chapter.comic?.title} - {chapter.title}
         </h1>
         <Link
           to="/"
-          className="text-white text-sm bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-md"
+          className="text-white text-sm bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded"
         >
           🏠 Beranda
         </Link>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-6 flex-1">
-        {/* Gambar halaman */}
+      {/* Chapter Images */}
+      <div className="flex-1 px-4 py-6 max-w-3xl mx-auto space-y-6">
         {chapter.images?.length > 0 ? (
-          <div className="space-y-6">
-            {chapter.images.map((img, i) => (
-              <img
-                key={img.id}
-                src={`/storage/${img.image_path}`}
-                alt={`Halaman ${i + 1}`}
-                className="w-full rounded-lg shadow-lg"
-              />
-            ))}
-          </div>
+          chapter.images.map((img, i) => (
+            <img
+              key={img.id}
+              src={`/storage/${img.image_path}`}
+              alt={`Halaman ${i + 1}`}
+              className="w-full rounded-lg shadow-md border border-gray-800"
+            />
+          ))
         ) : (
           <p className="text-sm text-gray-400">Tidak ada halaman gambar.</p>
         )}
 
+        {/* Komentar */}
         <CommentSection chapterId={chapterId} />
       </div>
 
-      {/* Floating Bottom Controls */}
-      <div className="fixed bottom-5 left-1/2 transform -translate-x-1/2 z-50 flex gap-4 bg-gray-800/80 px-6 py-3 rounded-full shadow-xl backdrop-blur">
+      {/* Floating Controls */}
+      <div className="fixed bottom-5 left-1/2 transform -translate-x-1/2 z-50 flex gap-4 bg-gray-900/90 px-6 py-3 rounded-full shadow-lg backdrop-blur">
         {chapter.previous_chapter && (
           <Link
             to={`/comics/${chapter.comic_id}/chapters/${chapter.previous_chapter.id}`}
             className="text-sm font-medium text-white hover:underline"
           >
-            ⬅️ Prev
+            ⬅ Prev
           </Link>
         )}
         <button
@@ -104,15 +103,15 @@ export default function ChapterReader() {
             to={`/comics/${chapter.comic_id}/chapters/${chapter.next_chapter.id}`}
             className="text-sm font-medium text-white hover:underline"
           >
-            Next ➡️
+            Next ➡
           </Link>
         )}
       </div>
 
-      {/* Popup Info Panel */}
+      {/* Info Panel */}
       {showInfo && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center backdrop-blur-sm">
-          <div className="bg-gray-900 rounded-2xl p-6 w-full max-w-4xl relative shadow-xl">
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
+          <div className="bg-gray-900 rounded-xl p-6 max-w-3xl w-full relative">
             <button
               onClick={() => setShowInfo(false)}
               className="absolute top-3 right-4 text-white text-2xl hover:text-red-400"
@@ -124,23 +123,23 @@ export default function ChapterReader() {
               <img
                 src={`/storage/${chapter.comic?.cover_image}`}
                 alt={chapter.comic?.title}
-                className="w-48 h-auto rounded-xl shadow"
+                className="w-44 h-auto rounded-lg shadow border border-gray-800"
               />
 
               <div className="flex-1">
-                <h2 className="text-2xl font-bold mb-1">{chapter.comic?.title}</h2>
-                <p className="mb-4 text-sm text-gray-400">
+                <h2 className="text-xl font-bold mb-1">{chapter.comic?.title}</h2>
+                <p className="text-sm text-gray-400 mb-4">
                   {chapter.comic?.description || "Tidak ada deskripsi."}
                 </p>
 
-                <div className="grid grid-cols-2 gap-y-2 text-sm text-white">
-                  <div><span className="font-semibold">Translator:</span> Firza</div>
-                  <div><span className="font-semibold">Proofreader:</span> Firza</div>
-                  <div><span className="font-semibold">Typesetter:</span> Biruuu</div>
-                  <div><span className="font-semibold">Quality:</span> Biruuu</div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div><strong>Translator:</strong> Firza</div>
+                  <div><strong>Proofreader:</strong> Firza</div>
+                  <div><strong>Typesetter:</strong> Biruuu</div>
+                  <div><strong>Quality:</strong> Biruuu</div>
                 </div>
 
-                <div className="mt-6 flex flex-wrap gap-3 text-white text-sm">
+                <div className="mt-4 flex flex-wrap gap-3 text-sm">
                   <a href="#" className="hover:underline">🌐 Website</a>
                   <a href="#" className="hover:underline">💬 Discord</a>
                   <a href="#" className="hover:underline">💖 Donasi</a>

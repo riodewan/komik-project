@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "../../axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
   const [comics, setComics] = useState([]);
@@ -113,37 +114,20 @@ export default function Home() {
         </div>
 
         {/* Rekomendasi */}
-        <div className="mb-10">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">🔥 Rekomendasi</h2>
-            <div className="flex gap-2">
-              {["manhwa", "manga", "manhua"].map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setSelectedType(type)}
-                  className={`px-3 py-1 rounded-full text-xs capitalize transition ${
-                    selectedType === type
-                      ? "bg-purple-600 text-white"
-                      : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                  }`}
+        <div className="relative">
+          <div className="flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900 pb-2">
+            {comics
+              .filter((comic) => comic.type?.toLowerCase() === selectedType)
+              .slice(0, 8)
+              .map((comic, index) => (
+                <motion.div
+                  key={comic.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="flex-shrink-0 w-36 relative group"
                 >
-                  {type}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900 pb-2">
-              {comics
-                .filter((comic) => comic.type?.toLowerCase() === selectedType)
-                .slice(0, 8)
-                .map((comic) => (
-                  <Link
-                    key={comic.id}
-                    to={`/comics/${comic.id}`}
-                    className="flex-shrink-0 w-36 relative group"
-                  >
+                  <Link to={`/comics/${comic.id}`}>
                     <img
                       src={`/storage/${comic.cover_image}`}
                       alt={comic.title}
@@ -154,43 +138,55 @@ export default function Home() {
                     </div>
                     <div className="text-sm mt-2 font-semibold line-clamp-1">{comic.title}</div>
                   </Link>
-                ))}
-            </div>
+                </motion.div>
+              ))}
           </div>
         </div>
 
+
         {/* Update */}
-        <div className="mb-10">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">🆕 Update</h2>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="mb-10">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">🆕 Update</h2>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {updates.slice(0, 6).map((comic, index) => (
+                <motion.div
+                  key={comic.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-gray-900 rounded-lg overflow-hidden group"
+                >
+                  <Link to={`/comics/${comic.id}`}>
+                    <div className="relative">
+                      <img
+                        src={`/storage/${comic.cover_image}`}
+                        alt={comic.title}
+                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                      />
+                      <div className="absolute top-2 left-2 bg-purple-600 text-xs px-2 py-0.5 rounded">
+                        {comic.latest_chapter?.title || "Ch. Terbaru"}
+                      </div>
+                    </div>
+                    <div className="p-2">
+                      <p className="text-sm font-semibold truncate">{comic.title}</p>
+                      <p className="text-xs text-gray-400">
+                        {comic.latest_chapter?.title || "Belum ada chapter"}
+                      </p>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {updates.slice(0, 6).map((comic) => (
-              <Link
-                key={comic.id}
-                to={`/comics/${comic.id}`}
-                className="bg-gray-900 rounded-lg overflow-hidden group"
-              >
-                <div className="relative">
-                  <img
-                    src={`/storage/${comic.cover_image}`}
-                    alt={comic.title}
-                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
-                  />
-                  <div className="absolute top-2 left-2 bg-purple-600 text-xs px-2 py-0.5 rounded">
-                    {comic.latest_chapter?.title || "Ch. Terbaru"}
-                  </div>
-                </div>
-                <div className="p-2">
-                  <p className="text-sm font-semibold truncate">{comic.title}</p>
-                  <p className="text-xs text-gray-400">
-                    {comic.latest_chapter?.title || "Belum ada chapter"}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+        </motion.div>
       </div>
 
       <Footer />

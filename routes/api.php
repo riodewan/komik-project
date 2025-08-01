@@ -41,6 +41,8 @@ Route::prefix('admin')->group(function () {
     });
 });
 
+Route::get('/search-comics', [ComicController::class, 'search']);
+
 //comment
 Route::get('/chapters/{chapterId}/comments', [CommentController::class, 'index']);
 

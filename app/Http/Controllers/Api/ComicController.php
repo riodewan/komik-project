@@ -119,4 +119,28 @@ class ComicController extends Controller
 
         return response()->json($comics);
     }
+
+    public function search(Request $request)
+    {
+        $query = Comic::query();
+
+        if ($request->filled('q')) {
+            $q = $request->input('q');
+            $query->where('title', 'like', "%$q%");
+        }
+
+        if ($request->filled('genres')) {
+            $genreIds = explode(',', $request->input('genres'));
+            $query->whereHas('genres', fn($q) => $q->whereIn('id', $genreIds));
+        }
+
+        if ($request->input('sort') === 'popular') {
+            $query->orderByDesc('views'); // pastikan kolom views ada
+        } else {
+            $query->latest(); // default
+        }
+
+        return response()->json($query->with('genres')->get());
+    }
+
 }
