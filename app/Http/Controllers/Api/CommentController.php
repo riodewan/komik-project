@@ -14,23 +14,25 @@ class CommentController extends Controller
     {
         $comments = Comment::with('user')
             ->where('chapter_id', $chapterId)
-            ->orderBy('created_at', 'asc')
+            ->orderBy('created_at', 'asc') // atau latest() untuk terbaru
             ->get();
 
-        return response()->json(['data' => $comments]);
+        return response()->json($comments);
     }
 
     public function store(Request $request)
     {
         $request->validate([
+            'content' => 'required|string',
             'chapter_id' => 'required|exists:chapters,id',
-            'content' => 'required|string|max:1000',
+            'parent_id' => 'nullable|exists:comments,id',
         ]);
 
         $comment = Comment::create([
-            'user_id' => Auth::id(),
+            'user_id' => auth()->id(),
             'chapter_id' => $request->chapter_id,
             'content' => $request->content,
+            'parent_id' => $request->parent_id,
         ]);
 
         return response()->json($comment->load('user'));
