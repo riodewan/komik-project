@@ -1,54 +1,67 @@
-# 📚 Comic Management Admin Panel
+📚 Comic Management Admin Panel
+Panel Admin modern untuk mengelola Komik, Chapter, Genre, Pengumuman, dan User, lengkap dengan otentikasi JWT, Role-based Access Control (RBAC), dan antarmuka UI dark mode. Dibangun menggunakan React + Laravel API.
 
-Project ini adalah **Admin Panel** untuk mengelola data Komik, Chapter, Genre, dan User. Dibangun menggunakan **React (Frontend)** + **Laravel API (Backend)** dengan sistem autentikasi JWT dan role-based access control (RBAC).
+✨ Fitur Utama
+🔐 Autentikasi & Role Management
+✅ Login menggunakan JWT
 
----
+✅ Role-Based Access Control:
 
-## ✨ Features
-✅ **Login & Autentikasi JWT**  
-✅ **Manajemen User**
-- Tambah / Edit / Hapus user
-- Role-based access (Admin, Editor, User)
+Admin: akses penuh
 
-✅ **Manajemen Komik**
-- Tambah / Edit / Hapus komik
-- Upload cover image
-- Multi-genre selection
-- CRUD Chapter per Komik
+Editor: akses terbatas
 
-✅ **Manajemen Genre**
-- Tambah / Edit / Hapus genre
+User: tidak bisa akses admin (403)
 
-✅ **Role Protection**
-- Hanya **Admin** yang bisa akses halaman admin
-- Non-admin akan diarahkan ke halaman **403 Access Denied**
+👥 Manajemen User
+Tambah / Edit / Hapus User
 
-✅ **Modern UI**
-- Dibangun dengan **TailwindCSS**
-- Dark mode ready
-- Notifikasi real-time dengan **react-hot-toast**
+Tetapkan Role: Admin, Editor, atau User
 
----
+📖 Manajemen Komik
+CRUD Komik (judul, deskripsi, cover, author, artist, type, status)
 
-## 🛠️ Tech Stack
-- **Frontend:** React, React Router v6, Axios, TailwindCSS
-- **Backend:** Laravel 10 API + Sanctum/JWT
-- **Database:** MySQL
-- **State Management:** useState, useEffect
-- **Notification:** react-hot-toast
+Upload cover image
 
----
+Pilih banyak genre (multi-genre)
 
-## 📌 Role Management
-- **Admin:** akses penuh semua halaman admin
-- **Editor:** akses terbatas (hanya data tertentu)
-- **User:** hanya bisa login tapi tidak bisa akses halaman admin (akan diarahkan ke 403)
+Tampilkan komik berdasarkan kategori Manga, Manhwa, dan Manhua
 
----
+📄 Manajemen Chapter
+CRUD Chapter per Komik
 
-## 🚀 Cara Menjalankan Project
+Penanda otomatis Chapter Terbaru di halaman Home
 
-### 🔧 Backend (Laravel API)
+🏷️ Manajemen Genre
+Tambah / Edit / Hapus genre
+
+Relasi genre dengan komik
+
+📢 Pengumuman
+CRUD pengumuman
+
+Pengumuman ditampilkan di homepage untuk semua user
+
+🖼️ Halaman Utama (Home)
+Carousel komik terbaru
+
+Filter rekomendasi berdasarkan tipe komik
+
+Komik dengan chapter terbaru ditampilkan di bagian update
+
+Desain dark mode modern & minimalis
+
+🛠️ Tech Stack
+Layer	Teknologi
+Frontend	React, React Router v6, TailwindCSS
+Backend	Laravel 10 API
+Autentikasi	JWT (sanctum opsional)
+Database	MySQL
+State	useState, useEffect
+Notifikasi	react-hot-toast
+
+🚀 Cara Menjalankan Project
+🔧 Backend (Laravel API)
 cd backend
 composer install
 cp .env.example .env
@@ -62,11 +75,17 @@ npm install
 npm run dev
 
 🔒 Default Login
-Email: admin@example.com
+mysql
+Email:    admin@gmail.com
 Password: password
-Role: Admin
+Role:     Admin
 
-📷 Preview UI
+📸 Preview UI
+Home dengan Carousel, Pengumuman, Rekomendasi & Chapter Terbaru
 
-📜 License
-Project ini dibuat untuk keperluan pembelajaran & pengembangan internal.
+Panel Admin untuk Komik, Chapter, Genre, dan User
+
+UI Responsive & Dark Mode Friendly
+
+📜 Lisensi
+Proyek ini dibuat untuk pembelajaran dan pengembangan internal. Bebas digunakan untuk kebutuhan pribadi atau akademik.
