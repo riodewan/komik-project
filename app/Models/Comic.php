@@ -37,4 +37,20 @@ class Comic extends Model
     {
         return $this->hasOne(Chapter::class)->latestOfMany();
     }
+
+    public function bookmarkedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'bookmarks')->withTimestamps();
+    }
+
+    public function inReadlistOfUsers()
+    {
+        return $this->belongsToMany(User::class, 'readlists')->withTimestamps();
+    }
+
+    public function inHistoryOfUsers()
+    {
+        return $this->belongsToMany(User::class, 'histories')->withTimestamps();
+    }
+
 }

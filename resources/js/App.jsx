@@ -1,4 +1,7 @@
+// App.jsx (lengkap + react-toastify + GoogleCallback fix)
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Admin
 import Layout from "./admin/components/Layout";
@@ -28,6 +31,7 @@ import AllAnnouncements from "./user/pages/AllAnnouncement";
 import AnnouncementDetail from "./user/pages/AnnouncementDetail";
 import Profile from "./user/pages/Profile";
 import SearchPage from "./user/pages/SearchPage";
+import Library from "./user/pages/Library";
 
 // Auth & Errors
 import Login from "./admin/pages/Login";
@@ -38,6 +42,7 @@ import Error404 from "./src/pages/Error404"; // ✅ disesuaikan
 export default function App() {
   return (
     <Router>
+      <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         {/* ==== USER SIDE ==== */}
         <Route path="/" element={<HomePage />} />
@@ -47,6 +52,7 @@ export default function App() {
         <Route path="/announcements/:id" element={<AnnouncementDetail />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/library" element={<Library />} />
 
         {/* ==== AUTH ==== */}
         <Route path="/login" element={<Login />} />

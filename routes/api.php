@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ReadingHistoryController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\LibraryController;
 use App\Models\User;
 use App\Models\Comic;
 use App\Models\Chapter;
@@ -117,6 +118,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
         return response()->json(['message' => 'Password berhasil diubah']);
     });
+
+    Route::get('/library', [LibraryController::class, 'index']);
+    Route::post('/library', [LibraryController::class, 'store']);
+    Route::delete('/library/{comic}', [LibraryController::class, 'destroy']);
 });
 
 // Logout

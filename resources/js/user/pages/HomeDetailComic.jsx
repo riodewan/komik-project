@@ -4,6 +4,7 @@ import axios from "../../axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 function getTimeAgo(dateStr) {
   const date = new Date(dateStr);
@@ -33,6 +34,11 @@ export default function HomeDetailComic() {
   const { id } = useParams();
   const [comic, setComic] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [added, setAdded] = useState({
+    readlist: false,
+    bookmark: false,
+    history: false,
+  });
 
   useEffect(() => {
     axios
@@ -50,6 +56,32 @@ export default function HomeDetailComic() {
       })
       .finally(() => setLoading(false));
   }, [id]);
+
+  const handleAddToLibrary = async (type) => {
+    try {
+      await axios.post(
+        "/api/library",
+        {
+          comic_id: comic.id,
+          type,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      toast.success(`✅ Komik ditambahkan ke ${type}`);
+      setAdded((prev) => ({ ...prev, [type]: true }));
+    } catch (error) {
+      if (error.response?.status === 409) {
+        toast.info(`⚠️ Komik sudah pernah ditambahkan ke ${type}`);
+        setAdded((prev) => ({ ...prev, [type]: true }));
+      } else {
+        toast.error("❌ Gagal menambahkan ke library");
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -71,10 +103,9 @@ export default function HomeDetailComic() {
     <div className="bg-gray-950 text-white min-h-screen flex flex-col">
       <Navbar />
 
-      {/* Header */}
-      <motion.div 
-        initial={{ opacity: 0, y: 30 }} 
-        animate={{ opacity: 1, y: 0 }} 
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="max-w-6xl mx-auto px-4 py-10 flex flex-col md:flex-row gap-8"
       >
@@ -89,29 +120,70 @@ export default function HomeDetailComic() {
         <div className="flex-1">
           <h1 className="text-3xl font-bold mb-2">{comic.title}</h1>
 
-          {/* Tombol Aksi */}
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-2 mb-4 flex-wrap">
             <Link
-              to={`/comics/${comic.id}/chapters/${comic.chapters?.[0]?.id || ''}`}
+              to={`/comics/${comic.id}/chapters/${comic.chapters?.[0]?.id || ""}`}
               className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm"
             >
               📖 Baca
             </Link>
-            <button className="bg-gray-800 px-4 py-2 rounded-lg text-sm">⭐ Bookmark</button>
-            <button className="bg-gray-800 px-4 py-2 rounded-lg text-sm">📚 Tambah ke Readlist</button>
+
+            <button
+              onClick={() => handleAddToLibrary("bookmark")}
+              disabled={added.bookmark}
+              className={`px-4 py-2 rounded-lg text-sm ${
+                added.bookmark
+                  ? "bg-gray-700 cursor-not-allowed"
+                  : "bg-gray-800 hover:bg-gray-700"
+              }`}
+            >
+              ⭐ {added.bookmark ? "Sudah Bookmark" : "Bookmark"}
+            </button>
+
+            <button
+              onClick={() => handleAddToLibrary("readlist")}
+              disabled={added.readlist}
+              className={`px-4 py-2 rounded-lg text-sm ${
+                added.readlist
+                  ? "bg-gray-700 cursor-not-allowed"
+                  : "bg-gray-800 hover:bg-gray-700"
+              }`}
+            >
+              📚 {added.readlist ? "Sudah di Readlist" : "Tambah ke Readlist"}
+            </button>
+
+            <button
+              onClick={() => handleAddToLibrary("history")}
+              disabled={added.history}
+              className={`px-4 py-2 rounded-lg text-sm ${
+                added.history
+                  ? "bg-gray-700 cursor-not-allowed"
+                  : "bg-gray-800 hover:bg-gray-700"
+              }`}
+            >
+              🕘 {added.history ? "Tercatat di History" : "Tambah ke History"}
+            </button>
           </div>
 
-          <p className="text-sm text-gray-300 mb-4 line-clamp-4">{comic.description}</p>
+          <p className="text-sm text-gray-300 mb-4 line-clamp-4">
+            {comic.description}
+          </p>
 
-          {/* Detail */}
           <div className="flex flex-wrap gap-4 text-sm text-gray-400">
-            <span><strong>Author:</strong> {comic.author || '-'}</span>
-            <span><strong>Artist:</strong> {comic.artist || '-'}</span>
-            <span><strong>Type:</strong> {comic.type}</span>
-            <span><strong>Status:</strong> {comic.status}</span>
+            <span>
+              <strong>Author:</strong> {comic.author || "-"}
+            </span>
+            <span>
+              <strong>Artist:</strong> {comic.artist || "-"}
+            </span>
+            <span>
+              <strong>Type:</strong> {comic.type}
+            </span>
+            <span>
+              <strong>Status:</strong> {comic.status}
+            </span>
           </div>
 
-          {/* Genre */}
           <div className="flex flex-wrap gap-2 mt-4">
             {(comic.genres || []).map((genre) => (
               <span
@@ -125,10 +197,9 @@ export default function HomeDetailComic() {
         </div>
       </motion.div>
 
-      {/* Daftar Chapter */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }} 
-        animate={{ opacity: 1, y: 0 }} 
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
         className="max-w-6xl mx-auto px-4 pb-20"
       >
@@ -145,13 +216,12 @@ export default function HomeDetailComic() {
                   key={chapter.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  transition={{ delay: index * 0.05 }}
                 >
                   <Link
                     to={`/comics/${comic.id}/chapters/${chapter.id}`}
                     className="bg-gray-900 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group"
                   >
-                    {/* Thumbnail */}
                     <div className="h-40 relative overflow-hidden">
                       <img
                         src={`/storage/${chapter.thumbnail || comic.cover_image}`}
@@ -159,11 +229,13 @@ export default function HomeDetailComic() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
-
-                    {/* Info */}
                     <div className="p-3">
-                      <p className="text-white font-semibold text-sm truncate">{chapter.title}</p>
-                      <p className="text-xs text-gray-400">{getTimeAgo(chapter.created_at)}</p>
+                      <p className="text-white font-semibold text-sm truncate">
+                        {chapter.title}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {getTimeAgo(chapter.created_at)}
+                      </p>
                     </div>
                   </Link>
                 </motion.div>
@@ -173,6 +245,7 @@ export default function HomeDetailComic() {
           <p className="text-gray-400 text-sm">Belum ada chapter tersedia.</p>
         )}
       </motion.div>
+
       <Footer />
     </div>
   );

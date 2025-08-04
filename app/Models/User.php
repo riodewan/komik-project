@@ -51,11 +51,6 @@ class User extends Authenticatable
         ];
     }
 
-    public function bookmarks()
-    {
-        return $this->hasMany(Bookmark::class);
-    }
-
     public function readingHistory()
     {
         return $this->hasMany(ReadingHistory::class);
@@ -64,5 +59,20 @@ class User extends Authenticatable
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function bookmarks()
+    {
+        return $this->belongsToMany(Comic::class, 'bookmarks')->withTimestamps();
+    }
+
+    public function readlists()
+    {
+        return $this->belongsToMany(Comic::class, 'readlists')->withTimestamps();
+    }
+
+    public function histories()
+    {
+        return $this->belongsToMany(Comic::class, 'histories')->withTimestamps();
     }
 }

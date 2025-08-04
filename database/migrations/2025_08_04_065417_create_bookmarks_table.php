@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('comic_id')->constrained()->onDelete('cascade');
-            $table->foreignId('last_read_chapter_id')->nullable()->constrained('chapters')->onDelete('set null');
             $table->timestamps();
+
+            $table->unique(['user_id', 'comic_id']);
         });
     }
 
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('comic_bookmarks');
+        Schema::dropIfExists('bookmarks');
     }
 };
